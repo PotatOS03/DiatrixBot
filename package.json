@@ -1,0 +1,17 @@
+{
+  "name": "diatrixbot",
+  "version": "1.0.0",
+  "description": "Discord bot",
+  "main": "bot.js",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "ms": "^2.1.1",
+    "superagent": "^3.8.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "author": "PotatOS",
+  "license": "ISC"
+}
