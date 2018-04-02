@@ -9,6 +9,9 @@ let xp = require("./xp.json");
 let cooldown = new Set();
 let cdSeconds = 5;
 
+let uptime = 0;
+setInterval(e => { uptime++; }, 1);
+
 fs.readdir("./commands", (err, files) => {
 
   if (err) console.log(err);
