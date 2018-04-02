@@ -9,9 +9,6 @@ let xp = require("./xp.json");
 let cooldown = new Set();
 let cdSeconds = 5;
 
-let uptime = 0;
-setInterval(e => uptime++, 1);
-
 fs.readdir("./commands", (err, files) => {
 
   if (err) console.log(err);
@@ -129,4 +126,4 @@ bot.on("message", async message => {
   }, cdSeconds * 1000);
 });
 
-bot.login(tokenfile.token);
+bot.login(process.env.BOT_TOKEN);
