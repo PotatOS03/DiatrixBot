@@ -2,7 +2,7 @@
   "name": "diatrixbot",
   "version": "1.0.0",
   "description": "Discord bot",
-  "main": "bot.js",
+  "main": "index.js",
   "dependencies": {
     "discord.js": "^11.3.2",
     "ms": "^2.1.1",
@@ -10,7 +10,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node bot.js"
+    "start": "node index.js"
   },
   "author": "PotatOS",
   "license": "ISC"
