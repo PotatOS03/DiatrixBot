@@ -129,4 +129,4 @@ bot.on("message", async message => {
   }, cdSeconds * 1000);
 });
 
-bot.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN);
