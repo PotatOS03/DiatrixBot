@@ -1,4 +1,5 @@
 const botconfig = require("./botconfig.json");
+const tokenfile = require("./token.json");
 const Discord = require("discord.js");
 const fs = require("fs");
 const bot = new Discord.Client({disableEveryone: true});
@@ -7,6 +8,9 @@ let coins = require("./coins.json");
 let xp = require("./xp.json");
 let cooldown = new Set();
 let cdSeconds = 5;
+
+let uptime = 0;
+setInterval(e => uptime++, 1);
 
 fs.readdir("./commands", (err, files) => {
 
@@ -27,7 +31,7 @@ fs.readdir("./commands", (err, files) => {
 })
 
 bot.on("ready", async () => {
-  console.log(`${bot.user.username} is online!`);
+  console.log(`${bot.user.username} is online in ${bot.guilds.size} servers!`);
   bot.user.setActivity(`Default Prefix: ${botconfig.prefix}`);
 });
 
