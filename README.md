@@ -1,3 +1,3 @@
-# DiatrixBot
+# NanicBot
 
-Discord bot for game company. Created by PotatOS03.
+Discord bot for Nanic Studios. Created by PotatOS03.
