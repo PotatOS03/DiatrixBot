@@ -1,10 +1,11 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 const ms = require("ms");
+const errors = require("../utilities/errors.js");
 let warns = JSON.parse(fs.readFileSync("./warnings.json", "utf8"));
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_MEMBERS")) return message.channel.send("You don't have the permissions.");
+    if (!message.member.hasPermission("MANAGE_MESSAGES")) return errors.noPerms(message, "MANAGE_MESSAGES");
     let wUser = message.mentions.members.first();
     if (!wUser) return message.channel.send("Couldn't find user.");
     if (wUser.hasPermission("MANAGE_MESSAGES")) return message.channel.send("That person can't be warned.");
@@ -32,10 +33,10 @@ module.exports.run = async (bot, message, args) => {
     let warnChannel = message.guild.channels.find(`name`, "incidents");
     if (!warnChannel) return message.channel.send("Couldn't find incidents channel.");
 
-    message.delete().catch(O_o=>{});
+    message.delete().catch();
     warnChannel.send(warnEmbed);
 
-    if (warns[wUser.id].warns === 2) {
+    if (warns[wUser.id].warns === 3) {
         let muterole = message.guild.roles.find(`name`, "Muted");
         if (!muterole) return message.channel.send("Create a Muted role");
 
@@ -48,7 +49,7 @@ module.exports.run = async (bot, message, args) => {
             message.channel.send(`<@${wUser.user.id}> has been unmuted.`);
         }, ms(mutetime))
     }
-    if (warns[wUser.id].warns === 3) {
+    if (warns[wUser.id].warns === 5) {
         message.guild.member(wUser).ban(reason);
         message.channel.send(`<@${wUser.user.id}> has been banned.`);
     }

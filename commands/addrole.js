@@ -1,7 +1,8 @@
 const Discord = require("discord.js");
+const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_ROLES")) return message.channel.send("You don't have the permissions.");
+    if (!message.member.hasPermission("MANAGE_ROLES")) return errors.noPerms(message, "MANAGE_ROLES");
     let rMember = message.mentions.members.first();
     if (!rMember) return message.channel.send("Couldn't find user.");
     let role = args.slice(1).join(" ");
@@ -12,7 +13,7 @@ module.exports.run = async (bot, message, args) => {
     if (rMember.roles.has(gRole.id)) return message.channel.send(`They already have the **${gRole.name}** role.`);
     await (rMember.addRole(gRole.id));
 
-    message.delete().catch(O_o=>{});
+    message.delete().catch();
     try {
         await rMember.send(`You have been given the **${gRole.name}** role in ${message.guild.name}.`)
     } catch (e) {

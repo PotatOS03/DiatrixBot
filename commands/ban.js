@@ -1,10 +1,10 @@
 const Discord = require("discord.js");
-const errors = require("../utilities/errors.js")
+const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
+    if (!message.member.hasPermission("BAN_MEMBERS")) return errors.noPerms(message, "BAN_MEMBERS");
     let bUser = message.mentions.members.first();
     let bReason = args.slice(1).join(" ");
-    if (!message.member.hasPermission("BAN_MEMBERS")) return errors.noPerms(message, "BAN_MEMBERS");
     if (!bUser) return message.channel.send("Couldn't find user.");
     if (bUser.hasPermission("MANAGE_MESSAGES")) return message.channel.send("That person can't be banned!");
 
@@ -21,7 +21,7 @@ module.exports.run = async (bot, message, args) => {
     if (!incidentChannel) return message.channel.send("Couldn't find incidents channel.");
 
     message.guild.member(bUser).ban(bReason);
-    message.delete().catch(O_o=>{});
+    message.delete().catch();
     incidentChannel.send(banEmbed);
 }
 

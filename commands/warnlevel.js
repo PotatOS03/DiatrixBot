@@ -1,10 +1,11 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 const ms = require("ms");
+const errors = require("../utilities/errors.js");
 let warns = JSON.parse(fs.readFileSync("./warnings.json", "utf8"));
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("You don't have the permissions.");
+    if (!message.member.hasPermission("MANAGE_MESSAGES")) return errors.noPerms(message, "MANAGE_MESSAGES");
     let wUser = message.mentions.members.first();
     if (!wUser) return message.channel.send("Couldn't find user.");
     if (!warns[wUser.id]) warns[wUser.id] = {
