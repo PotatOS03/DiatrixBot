@@ -1,4 +1,5 @@
 const botconfig = require("./botconfig.json");
+const tokenfile = require("./token.json");
 const Discord = require("discord.js");
 const fs = require("fs");
 const bot = new Discord.Client({disableEveryone: true});
@@ -54,7 +55,6 @@ bot.on("message", async message => {
     prefixes[message.guild.id] = {
       prefixes: botconfig.prefix
     };
-    console.log(prefixes);
   }
 
   if (!coins[message.author.id]) {
@@ -128,4 +128,4 @@ bot.on("message", async message => {
   }, cdSeconds * 1000);
 });
 
-bot.login(process.env.BOT_TOKEN);
+bot.login(tokenfile.token);

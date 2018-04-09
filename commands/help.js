@@ -27,7 +27,7 @@ module.exports.run = async (bot, message, args) => {
     let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
 
     let helpEmbed = new Discord.RichEmbed()
-    .setDescription("List of commands")
+    .setDescription("List of commands\n`[required]` `(optional)`")
     .setColor("f04747")
     .setFooter(`Page ${page} of ${totalPages}. Type "${prefixes[message.guild.id].prefixes}help [page]" to view a new page.`)
     .addField("Prefix", prefixes[message.guild.id].prefixes)
@@ -37,12 +37,16 @@ module.exports.run = async (bot, message, args) => {
         helpEmbed.addField("`" + `${cmds[i].name}${cmds[i].usage}` + "`", cmds[i].desc)
         i++;
     };
-    
-    message.channel.send(helpEmbed);
+
+    try {
+        await message.author.send(helpEmbed);
+    } catch (e) {
+        message.channel.send(helpEmbed);
+    }
 }
 
 module.exports.help = {
     name: "help",
     desc: "Generate a list of commands",
-    usage: " [page]"
+    usage: " (page)"
 }

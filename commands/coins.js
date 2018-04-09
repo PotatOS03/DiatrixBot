@@ -1,17 +1,22 @@
 const Discord = require("discord.js");
 let coins = require("../coins.json");
+const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    if (!coins[message.author.id]) {
-        coins[message.author.id] = {
+    let cUser = message.mentions.members.first();
+    if (!args[0]) cUser = message.member;
+    else if (!cUser) return message.channel.send("Specify a valid user.");
+
+    if (!coins[cUser.id]) {
+        coins[cUser.id] = {
             coins: 0
         };
     }
 
-    let uCoins = coins[message.author.id].coins;
+    let uCoins = coins[cUser.id].coins;
 
     let coinEmbed = new Discord.RichEmbed()
-    .setAuthor(message.author.username)
+    .setAuthor(cUser.user.username)
     .setColor("f04747")
     .addField("Coins", uCoins);
 
@@ -20,6 +25,6 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.help = {
     name: "coins",
-    desc: "Check how many coins you have",
-    usage: ""
+    desc: "Check how many coins a user has",
+    usage: " (user)"
 }
