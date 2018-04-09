@@ -27,7 +27,7 @@ module.exports.run = async (bot, message, args) => {
 }
 
 module.exports.help = {
-    name: "level2",
+    name: "level",
     desc: "Check what level a user is at",
     usage: " (user)"
 }
