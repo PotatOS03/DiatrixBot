@@ -4,9 +4,14 @@ const errors = require("../utilities/errors.js");
 let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_GUILD")) return errors.noPerms(message, "MANAGE_GUILD");
+    if (!message.member.hasPermission("MANAGE_GUILD") || !args[0]) {
+        let pEmbed = new Discord.RichEmbed()
+        .setColor("f04747")
+        .addField(`${message.guild.name} prefix`, prefixes[message.guild.id].prefixes)
+        if (message.member.hasPermission("MANAGE_GUILD")) pEmbed.setFooter(`Type ${prefixes[message.guild.id].prefixes}prefix [desired prefix] to change the server's prefix`);
 
-    if (!args[0] || args[0] === "help") return message.channel.send("Usage: `" + `${prefixes[message.guild.id].prefixes}prefix [desired prefix here]` + "`");
+        return message.channel.send(pEmbed);
+    }
 
     prefixes[message.guild.id] = {
         prefixes: args[0]
@@ -27,5 +32,6 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "prefix",
     desc: "Change the prefix for commands",
-    usage: " (desired prefix)"
+    usage: " (desired prefix)",
+    perms: "Manage Server"
 }
