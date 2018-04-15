@@ -8,11 +8,7 @@ let xp = require("./xp.json");
 let cooldown = new Set();
 let cdSeconds = 5;
 
-let uptime = 0;
-setInterval(e => uptime++, 1);
-
 fs.readdir("./commands", (err, files) => {
-
   if (err) console.log(err);
 
   let jsfile = files.filter(f => f.split(".").pop() === "js")
@@ -26,62 +22,105 @@ fs.readdir("./commands", (err, files) => {
     bot.commands.set(props.help.name, props);
     console.log(`${f} loaded!`);
   });
-
 })
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} is online in ${bot.guilds.size} servers!`);
-  bot.user.setActivity(`Default Prefix: ${botconfig.prefix}`);
+  //bot.user.setActivity(`Default Prefix: ${botconfig.prefix}`);
+  bot.user.setActivity("Default Prefix: n/");
 });
 
 bot.on("guildMemberAdd", async member => {
-  let welcomeChannel = member.guild.channels.find(`name`, "bot");
-  welcomeChannel.send(`Welcome! ${member} has joined **${member.guild.name}**!`);
+  let welcomeChannel = member.guild.channels.find(`name`, "general");
+  welcomeChannel.send(`${member} has joined **${member.guild.name}**! Welcome!`);
 });
 
 bot.on("guildMemberRemove", async member => {
-  let welcomeChannel = member.guild.channels.find(`name`, "bot");
+  let welcomeChannel = member.guild.channels.find(`name`, "general");
   welcomeChannel.send(`Goodbye, ${member} has left the server.`);
-})
+});
+
+/*bot.on("messageReactionAdd", async (messageReaction, user) => {
+  let starBoard = messageReaction.message.guild.channels.find(`name`, "star-board");
+  if (!messageReaction.message.reactions.get("⭐")) return;
+  if (messageReaction.message.reactions.get("⭐").count >= 1 && messageReaction.message.channel.name !== "star-board") {
+    let starEmbed = new Discord.RichEmbed()
+    .setColor("f04747")
+    .setThumbnail(messageReaction.message.author.displayAvatarURL)
+    .addField("Author", `<@${messageReaction.message.author.id}>`)
+    .addField("Message", messageReaction.message.content)
+    .addField("Channel", messageReaction.message.channel)
+    .setTimestamp(messageReaction.message.createdAt);
+
+    starBoard.send(starEmbed);
+    messageReaction.message.clearReactions();
+  }
+});*/
 
 bot.on("message", async message => {
   if (message.author.bot) return;
-  if (message.channel.type === "dm") return;
 
+  let messageArray = message.content.split(" ");
+  let cmd = messageArray[0].toLowerCase();
+  let args = messageArray.slice(1);
+
+  if (message.channel.type === "dm") {
+    if (!message.content.startsWith(botconfig.prefix)) return;
+    let commandfile = bot.commands.get(cmd.slice(botconfig.prefix.length));
+    if (commandfile) commandfile.dm(bot, message, args);
+    return;
+  }
+  
   let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
-
+  
   if (!prefixes[message.guild.id]) {
     prefixes[message.guild.id] = {
       prefixes: botconfig.prefix
     };
   }
+  
+  let prefix = prefixes[message.guild.id].prefixes;
+  
+  if (!message.content.startsWith(prefix)) return;
+  if (cooldown.has(message.author.id)) {
+    message.delete();
+    return message.reply(`You have to wait ${cdSeconds} seconds between commands.`);
+  }
+  if (!message.member.hasPermission("MANAGE_MESSAGES")) {
+    cooldown.add(message.author.id);
+  }
+  
+  let commandfile = bot.commands.get(cmd.slice(prefix.length));
+  if (commandfile) return commandfile.run(bot, message, args);
+  
+  setTimeout(() => {
+    cooldown.delete(message.author.id)
+  }, cdSeconds * 1000);
 
   if (!coins[message.author.id]) {
     coins[message.author.id] = {
       coins: 0
     };
   }
-
+  
   let coinAmount = Math.floor(Math.random() * 60) + 1;
   let baseAmount = Math.floor(Math.random() * 60) + 1;
-
+  
   if (coinAmount === baseAmount) {
-    coins[message.author.id] = {
-      coins: coins[message.author.id].coins + Math.floor(coinAmount / 3)
-    }
+    coins[message.author.id].coins += Math.floor(coinAmount / 3) + 1;
     fs.writeFile("./coins.json", JSON.stringify(coins), (err) => {
       if (err) console.log(err);
     });
-
+  
     let coinEmbed = new Discord.RichEmbed()
     .setAuthor(message.author.username)
     .setColor("f04747")
     .addField("💸", `${Math.floor(coinAmount / 3)} coins added!`)
     .addField("Total Coins", coins[message.author.id].coins);
-
+  
     message.channel.send(coinEmbed).then(msg => {msg.delete(10000)});
   }
-
+  
   let xpAdd = Math.floor(Math.random() * 5) + 15;
   if (!xp[message.author.id]) {
     xp[message.author.id] = {
@@ -98,33 +137,12 @@ bot.on("message", async message => {
     .setColor("f04747")
     .addField("User", message.author.username)
     .addField("New Level", xp[message.author.id].level);
-
+  
     message.channel.send(levelUp).then(msg => {msg.delete(10000)});
   }
   fs.writeFile("./xp.json", JSON.stringify(xp), (err) => {
     if (err) console.log(err);
   });
-
-  let prefix = prefixes[message.guild.id].prefixes;
-  let messageArray = message.content.split(" ");
-  let cmd = messageArray[0];
-  let args = messageArray.slice(1);
-
-  if (!message.content.startsWith(prefix)) return;
-  if (cooldown.has(message.author.id)) {
-    message.delete();
-    return message.reply(`You have to wait ${cdSeconds} seconds between commands.`);
-  }
-  if (!message.member.hasPermission("MANAGE_MESSAGES")) {
-    cooldown.add(message.author.id);
-  }
-
-  let commandfile = bot.commands.get(cmd.slice(prefix.length));
-  if (commandfile) commandfile.run(bot, message, args);
-
-  setTimeout(() => {
-    cooldown.delete(message.author.id)
-  }, cdSeconds * 1000);
 });
 
 bot.login(process.env.BOT_TOKEN);
