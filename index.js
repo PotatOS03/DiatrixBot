@@ -26,8 +26,7 @@ fs.readdir("./commands", (err, files) => {
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} is online in ${bot.guilds.size} servers!`);
-  //bot.user.setActivity(`Default Prefix: ${botconfig.prefix}`);
-  bot.user.setActivity("Default Prefix: n/");
+  bot.user.setActivity(`Default Prefix: ${botconfig.prefix}`);
 });
 
 bot.on("guildMemberAdd", async member => {
