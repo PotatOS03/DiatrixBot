@@ -1,7 +1,8 @@
 const Discord = require("discord.js");
+const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    if (!args[0]) return message.channel.send("Please ask a question!");
+    if (!args[0]) return errors.usage(message, "8ball", "Ask a question");
     let replies = ["Yes.", "No.", "Yeano", "Absolutely not.", "Almost certainly.", "I'm busy right now. Ask again later.", "You tell me.", "Yes, probably.", "Do you want me to be honest?"];
 
     let result = Math.floor(Math.random() * replies.length);
@@ -18,5 +19,6 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "8ball",
     desc: "Ask a question for the 8 ball",
-    usage: " [question]"
+    usage: " [question]",
+    info: ""
 }

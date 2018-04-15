@@ -17,6 +17,5 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.help = {
     name: "serverinfo",
-    desc: "Get information about the server",
-    usage: ""
+    desc: "Get information about the server"
 }

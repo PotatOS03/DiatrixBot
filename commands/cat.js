@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const errors = require("../utilities/errors.js");
 const superagent = require("superagent");
 
 module.exports.run = async (bot, message, args) => {
@@ -12,13 +13,13 @@ module.exports.run = async (bot, message, args) => {
         .setImage(body.file);
 
         message.channel.send(catEmbed);
+        console.log(body);
     } catch(e) {
-        message.channel.send("Please try again!").then(msg => msg.delete(5000));
+        errors.other(message, "Please try again");
     }
 }
 
 module.exports.help = {
     name: "cat",
-    desc: "Generate a random cat photo or gif",
-    usage: ""
+    desc: "Generate a random cat photo or gif"
 }

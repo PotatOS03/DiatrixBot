@@ -2,15 +2,18 @@ const Discord = require("discord.js");
 const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_ROLES")) return errors.noPerms(message, "MANAGE_ROLES");
-    let rMember = message.mentions.members.first();
-    if (!rMember) return message.channel.send("Couldn't find user.");
-    let role = args.slice(1).join(" ");
-    if (!role) return message.channel.send("No role specified.");
-    let gRole = message.guild.roles.find(`name`, role);
-    if (!gRole) return message.channel.send("Couldn't find that role.");
+    if (!message.member.hasPermission("MANAGE_ROLES")) return errors.noPerms(message, "Manage Roles");
 
-    if (!rMember.roles.has(gRole.id)) return message.channel.send(`They don't have the **${gRole.name}** role.`);
+    let rMember = message.mentions.members.first();
+    if (!rMember) return errors.usage(message, "removerole", "Couldn't find user");
+
+    let role = args.slice(1).join(" ");
+    if (!role) return errors.usage(message, "removerole", "No role specified");
+
+    let gRole = message.guild.roles.find(`name`, role);
+    if (!gRole) return errors.usage(message, "removerole", `Couldn't find role: ${role}`);
+
+    if (!rMember.roles.has(gRole.id)) return errors.other(message, `They don't have the **${gRole.name}** role.`);
     await (rMember.removeRole(gRole.id));
 
     message.delete().catch(O_o=>{});
@@ -25,5 +28,6 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "removerole",
     desc: "Remove a role from a user",
-    usage: " [user] [role]"
+    usage: " [user] [role]",
+    perms: "Manage Roles"
 }

@@ -3,10 +3,10 @@ const ms = require("ms");
 const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_MESSAGES")) return errors.noPerms(message, "MANAGE_MESSAGES");
+    if (!message.member.hasPermission("MANAGE_MESSAGES")) return errors.noPerms(message, "Manage Messages");
     let tomute = message.mentions.members.first();
-    if (!tomute) return message.channel.send("Couldn't find user.");
-    if (tomute.hasPermission("MANAGE_MESSAGES")) return message.channel.send("That person can't be muted!");
+    if (!tomute) return errors.usage(message, "mute", "Couldn't find user");
+    if (tomute.hasPermission("MANAGE_MESSAGES")) return errors.other(message, "That person can't be muted");
     let muterole = message.guild.roles.find(`name`, "Muted");
     if (!muterole) {
         try {
@@ -27,7 +27,7 @@ module.exports.run = async (bot, message, args) => {
     }
 
     let muteTime = args[1];
-    if (muteTime && !ms(muteTime)) return message.channel.send("Specify a valid time.");
+    if (muteTime && !ms(muteTime)) return errors.usage(message, "mute", "Specify a valid time");
 
     await(tomute.addRole(muterole.id));
     message.delete().catch();
@@ -45,5 +45,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "mute",
     desc: "Mute a user",
-    usage: " [user] (time)"
+    usage: " [user] (time)",
+    perms: "Manage Messages",
+    info: "If no time is specified, user will be muted indefinitely"
 }

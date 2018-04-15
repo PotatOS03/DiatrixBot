@@ -3,17 +3,15 @@ const ms = require("ms");
 const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    if (!message.member.hasPermission("MANAGE_MESSAGES")) return errors.noPerms(message, "MANAGE_MESSAGES");
+    if (!message.member.hasPermission("MANAGE_GUILD")) return errors.noPerms(message, "Manage Server");
     
     let pollTime = args[0];
-    if (!ms(pollTime)) return message.channel.send("Specify a time.");
+    if (!args[0] || !ms(pollTime)) return errors.usage(message, "poll", "Specify a time");
     
     let pollMessage = args.slice(1).join(" ");
-    if (!pollMessage) return message.channel.send("Specify a message.");
+    if (!pollMessage) return errors.usage(message, "level", "Specify a message");
     
     message.delete().catch();
-    
-    let pollChannel = message.guild.channels.find(`name`, "announcements");
 
     let pollEmbed = new Discord.RichEmbed()
     .setTitle("New Poll")
@@ -21,7 +19,7 @@ module.exports.run = async (bot, message, args) => {
     .addField(pollMessage, "React to this message with 👍 or 👎 to vote!")
     .setFooter(`This poll will be completed after ${pollTime}`);
 
-    pollChannel.send(pollEmbed)
+    message.channel.send(pollEmbed)
     .then(m => {
         m.react("👍")
         m.react("👎")
@@ -36,7 +34,7 @@ module.exports.run = async (bot, message, args) => {
 
             m.delete();
             
-            pollChannel.send(pollResults);
+            message.channel.send(pollResults);
         }, ms(pollTime));
     });
 }
@@ -44,5 +42,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "poll",
     desc: "Create a poll for users to vote on",
-    usage: " [time] [message]"
+    usage: " [time] [message]",
+    perms: "Manage Server",
+    info: "Users must react to the poll message before the time runs out"
 }
