@@ -24,7 +24,7 @@ module.exports.run = async (bot, message, args) => {
             let cmdEmbed = new Discord.RichEmbed()
             .setDescription(`**${arg}** command help`)
             .setColor("f04747")
-            .addField("Usage", "`" + `${prefixes[message.guild.id].prefixes}${arg}${(cmds[i].usage || "")}` + "`")
+            .addField("Usage \`[required] (optional)\`", "`" + `${prefixes[message.guild.id].prefixes}${arg}${(cmds[i].usage || "")}` + "`")
             .addField("Description", cmds[i].desc)
             if (cmds[i].perms) cmdEmbed.addField("Required Permission", cmds[i].perms)
             if (cmds[i].dm) cmdEmbed.addField("Allowed in DM", "Yes")
@@ -69,7 +69,7 @@ module.exports.dm = async (bot, message, args) => {
     for (var i = 0; i < cmds.length; i++) {
         if (arg === cmds[i].name) {
             let cmdEmbed = new Discord.RichEmbed()
-            .setDescription(`**${arg}** command help`)
+            .setDescription(`**${arg}** command help\n\`[required] (optional)\``)
             .setColor("f04747")
             .addField("Usage", "`" + `${botconfig.prefix}${arg}${(cmds[i].usage || "")}` + "`")
             .addField("Description", cmds[i].desc)
