@@ -1,9 +1,10 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 const errors = require("../utilities/errors.js");
-let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
 
 module.exports.run = async (bot, message, args) => {
+    let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
+    
     if (!message.member.hasPermission("MANAGE_GUILD") || !args[0]) {
         let pEmbed = new Discord.RichEmbed()
         .setColor("f04747")
