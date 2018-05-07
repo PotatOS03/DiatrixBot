@@ -28,7 +28,7 @@ module.exports.usage = (message, command, info) => {
     .addField("Message Sent", message.content)
     if (message.channel.type === "text") usageEmbed.addField("Usage", "`" + `${prefixes[message.guild.id].prefixes}${cmdHelp.name}${cmdHelp.usage}` + "`", true)
     if (message.channel.type === "dm") usageEmbed.addField("Usage", "`" + `${botconfig.prefix}${cmdHelp.name}${cmdHelp.usage}` + "`", true)
-    .addField("Info", info, true);
+    usageEmbed.addField("Info", info, true);
 
     message.channel.send(usageEmbed).then(msg => msg.delete(60000));
 }
