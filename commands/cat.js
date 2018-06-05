@@ -21,5 +21,6 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.help = {
     name: "cat",
-    desc: "Generate a random cat photo or gif"
+    desc: "Generate a random cat photo or gif",
+    group: "Fun"
 }

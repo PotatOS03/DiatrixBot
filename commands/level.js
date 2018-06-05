@@ -54,6 +54,7 @@ module.exports.dm = async (bot, message, args) => {
 module.exports.help = {
     name: "level",
     desc: "Check what level a user is at",
+    group: "Users",
     usage: " (user)",
     dm: true
 }

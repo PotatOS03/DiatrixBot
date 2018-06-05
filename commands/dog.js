@@ -20,5 +20,6 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.help = {
     name: "dog",
-    desc: "Generate a random dog photo or gif"
+    desc: "Generate a random dog photo or gif",
+    group: "Fun"
 }

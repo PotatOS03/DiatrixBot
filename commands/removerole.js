@@ -28,6 +28,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "removerole",
     desc: "Remove a role from a user",
+    group: "Server",
     usage: " [user] [role]",
     perms: "Manage Roles"
 }

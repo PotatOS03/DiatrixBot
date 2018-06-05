@@ -81,6 +81,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "warn",
     desc: "Warn a user",
+    group: "Moderation",
     usage: " [user] [reason]",
     perms: "Manage Messages",
     info: `User gets automatically muted after ${autoMute} warnings and banned after ${autoBan} warnings`

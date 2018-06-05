@@ -1,22 +1,20 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 let cmds = [];
+let groups = [];
 
 fs.readdir("./commands", (err, files) => {
     if (err) console.log(err);
     let jsfile = files.filter(f => f.split(".").pop() === "js")
     jsfile.forEach((f, i) => {
         let props = require(`../commands/${f}`);
-        cmds.push(props.help)
+        cmds.push(props.help);
+        if (!groups.includes(props.help.group) && props.help.group) groups.push(props.help.group);
     });
 })
 
 module.exports.run = async (bot, message, args) => {
-    let perPage = 12;
-
-    let totalPages = Math.ceil(cmds.length / perPage);
-
-    let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
+    let prefixes = require("../prefixes.json");
 
     let arg = args.slice(0).join(" ");
     for (var i = 0; i < cmds.length; i++) {
@@ -26,6 +24,7 @@ module.exports.run = async (bot, message, args) => {
             .setColor("f04747")
             .addField("Usage \`[required] (optional)\`", "`" + `${prefixes[message.guild.id].prefixes}${arg}${(cmds[i].usage || "")}` + "`")
             .addField("Description", cmds[i].desc)
+            if (cmds[i].group) cmdEmbed.addField("Category", cmds[i].group)
             if (cmds[i].perms) cmdEmbed.addField("Required Permission", cmds[i].perms)
             if (cmds[i].dm) cmdEmbed.addField("Allowed in DM", "Yes")
             else cmdEmbed.addField("Allowed in DM", "No")
@@ -36,22 +35,34 @@ module.exports.run = async (bot, message, args) => {
         }
     }
 
-    let page = Math.floor(args[0]);
-    if (!page || page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-
     let helpEmbed = new Discord.RichEmbed()
-    .setDescription("List of commands\n`[required]` `(optional)`")
+    .setDescription("List of commands")
     .setColor("f04747")
     .addField(`${message.guild.name} prefix:`, prefixes[message.guild.id].prefixes)
-    .setFooter(`Page ${page} of ${totalPages}. Type "${prefixes[message.guild.id].prefixes}help (page/command)" to view a new page or more information about a command`)
     
-    for (var i = page * perPage - perPage; i < Math.min(page * perPage, cmds.length); i++) {
-        helpEmbed.addField(cmds[i].name, cmds[i].desc)
+    for (var i = 0; i < groups.length; i++) {
+        let longestName = 0;
+        for (var j = 0; j < cmds.length; j++) {
+            if (cmds[j].name.length > longestName && cmds[j].group === groups[i]) longestName = cmds[j].name.length;
+        }
+
+        let cmdsText = "";
+        for (var j = 0; j < cmds.length; j++) {
+            if (cmds[j].group === groups[i]) {
+                cmdsText += `\`${cmds[j].name}`;
+                for (var k = cmds[j].name.length; k < longestName; k++) {
+                    cmdsText += " ";
+                }
+                cmdsText += `   |\` ${cmds[j].desc}\n`;
+            }
+        }
+        if (groups[i] !== "Developer") helpEmbed.addField(`${groups[i]}`, cmdsText)
     }
+    helpEmbed.setFooter(`Type "${prefixes[message.guild.id].prefixes}help (command)" to view more information about a command`);
 
     try {
         await message.author.send(helpEmbed);
+        message.react("👍");
         message.channel.send("Help page has been sent through DM");
     } catch (e) {
         message.channel.send(helpEmbed);
@@ -59,19 +70,15 @@ module.exports.run = async (bot, message, args) => {
 }
 
 module.exports.dm = async (bot, message, args) => {
-    let perPage = 12;
-
-    let totalPages = Math.ceil(cmds.length / perPage);
-
-    let botconfig = JSON.parse(fs.readFileSync("./botconfig.json", "utf8"));
+    let botconfig = require("../botconfig.json");
 
     let arg = args.slice(0).join(" ");
     for (var i = 0; i < cmds.length; i++) {
         if (arg === cmds[i].name) {
             let cmdEmbed = new Discord.RichEmbed()
-            .setDescription(`**${arg}** command help\n\`[required] (optional)\``)
+            .setDescription(`**${arg}** command help`)
             .setColor("f04747")
-            .addField("Usage", "`" + `${botconfig.prefix}${arg}${(cmds[i].usage || "")}` + "`")
+            .addField("Usage \`[required] (optional)\`", "`" + `${botconfig.prefix}${arg}${(cmds[i].usage || "")}` + "`")
             .addField("Description", cmds[i].desc)
             if (cmds[i].perms) cmdEmbed.addField("Required Permission", cmds[i].perms)
             if (cmds[i].dm) cmdEmbed.addField("Allowed in DM", "Yes")
@@ -83,19 +90,30 @@ module.exports.dm = async (bot, message, args) => {
         }
     }
 
-    let page = Math.floor(args[0]);
-    if (!page || page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-
     let helpEmbed = new Discord.RichEmbed()
-    .setDescription("List of commands\n`[required]` `(optional)`")
+    .setDescription("List of commands")
     .setColor("f04747")
     .addField(`Prefix:`, botconfig.prefix)
-    .setFooter(`Page ${page} of ${totalPages}. Type "${botconfig.prefix}help (page/command)" to view a new page or more information about a command`)
-    
-    for (var i = page * perPage - perPage; i < Math.min(page * perPage, cmds.length); i++) {
-        helpEmbed.addField(cmds[i].name, cmds[i].desc)
+
+    for (var i = 0; i < groups.length; i++) {
+        let longestName = 0;
+        for (var j = 0; j < cmds.length; j++) {
+            if (cmds[j].name.length > longestName && cmds[j].group === groups[i]) longestName = cmds[j].name.length;
+        }
+
+        let cmdsText = "";
+        for (var j = 0; j < cmds.length; j++) {
+            if (cmds[j].group === groups[i]) {
+                cmdsText += `\`${cmds[j].name}`;
+                for (var k = cmds[j].name.length; k < longestName; k++) {
+                    cmdsText += " ";
+                }
+                cmdsText += `   |\` ${cmds[j].desc}\n`;
+            }
+        }
+        if (groups[i] !== "Developer") helpEmbed.addField(`${groups[i]}`, cmdsText)
     }
+    helpEmbed.setFooter(`Type "${botconfig.prefix}help (command)" to view more information about a command`)
 
     message.channel.send(helpEmbed);
 }
@@ -103,6 +121,7 @@ module.exports.dm = async (bot, message, args) => {
 module.exports.help = {
     name: "help",
     desc: "See a list of commands or information about a command",
-    usage: " (page/command)",
+    group: "Information",
+    usage: " (command)",
     dm: true
 }

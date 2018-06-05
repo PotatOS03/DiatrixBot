@@ -44,5 +44,6 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "pay",
     desc: "Pay a user in coins",
+    group: "Users",
     usage: " [user] [amount]"
 }
