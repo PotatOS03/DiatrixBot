@@ -30,6 +30,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "ban",
     desc: "Ban a user",
+    group: "Moderation",
     usage: " [user] [reason]",
     perms: "Ban Members"
 }

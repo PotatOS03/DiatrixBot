@@ -44,6 +44,7 @@ module.exports.dm = async (bot, message, args) => {
 module.exports.help = {
     name: "coins",
     desc: "Check how many coins a user has",
+    group: "Users",
     usage: " (user)",
     info: "Coins have a random chance of being given for every message you send",
     dm: true

@@ -24,6 +24,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "addrole",
     desc: "Give a role to a user",
+    group: "Server",
     usage: " [user] [role]",
     perms: "Manage Roles"
 }

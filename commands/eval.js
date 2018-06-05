@@ -4,13 +4,14 @@ module.exports.run = async (bot, message, args) => {
     if (message.author.id !== "286664522083729409") return;
     let code = args.slice(0).join(" ");
     try {
-        await message.channel.send(eval(code));
+        await eval(code);
     } catch(e) {
-        message.channel.send("ERROR: `" + e.toString() + "`");
+        message.channel.send("`" + e.toString() + "`");
     }
 }
 
 module.exports.help = {
     name: "eval",
-    desc: "Run code"
+    desc: "Run code",
+    group: "Developer"
 }

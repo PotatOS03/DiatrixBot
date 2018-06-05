@@ -11,6 +11,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "say",
     desc: "Say something through the bot",
+    group: "Moderation",
     usage: " [message]",
     perms: "Manage Messages"
 }

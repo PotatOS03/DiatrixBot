@@ -31,5 +31,6 @@ module.exports.dm = async (bot, message, args) => {
 module.exports.help = {
     name: "botinfo",
     desc: "Get information about the bot",
+    group: "Information",
     dm: true
 }

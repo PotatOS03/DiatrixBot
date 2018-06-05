@@ -1,16 +1,18 @@
 {
-  "name": "NanicBot",
+  "name": "nanicbot",
   "version": "1.0.0",
   "description": "Discord bot",
   "main": "index.js",
   "dependencies": {
     "discord.js": "^11.3.2",
     "ms": "^2.1.1",
-    "superagent": "^3.8.2"
+    "opusscript": "0.0.6",
+    "superagent": "^3.8.2",
+    "ytdl-core": "^0.20.3"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "PotatOS",
   "license": "ISC"

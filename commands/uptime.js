@@ -30,5 +30,6 @@ module.exports.dm = async (bot, message, args) => {
 module.exports.help = {
     name: "uptime",
     desc: "See how long the bot has been running",
+    group: "Information",
     dm: true
 }

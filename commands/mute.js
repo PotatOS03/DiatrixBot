@@ -45,6 +45,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "mute",
     desc: "Mute a user",
+    group: "Moderation",
     usage: " [user] (time)",
     perms: "Manage Messages",
     info: "If no time is specified, user will be muted indefinitely"

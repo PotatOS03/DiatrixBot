@@ -31,6 +31,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "warnlevel",
     desc: "Check how many warnings a user has",
+    group: "Moderation",
     usage: " (user)",
     perms: "Manage Messages"
 }

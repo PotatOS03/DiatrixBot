@@ -58,6 +58,7 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "clear",
     desc: "Clear messages",
+    group: "Moderation",
     usage: " [number of messages] (equals/contains/author/bots) (text/author)",
     perms: "Manage Messages",
     info: "Equals: Clears messages that match text\nContains: Clears messages containing text\nAuthor: Clears messages sent by a certain user\nBots: Clears messages sent by bots"
