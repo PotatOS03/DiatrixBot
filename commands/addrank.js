@@ -32,7 +32,7 @@ module.exports.run = async (bot, message, args) => {
     .setTitle("Rank Added!")
     .setColor("f04747")
     .addField("Rank", rankRole.name)
-    .setFooter(`To view all ranks, type "${prefixes[message.guild.id].prefix}ranks"`)
+    .setFooter(`To view all ranks, type "${prefixes[message.guild.id].prefixes}ranks"`)
 
     message.channel.send(rankEmbed);
 }
