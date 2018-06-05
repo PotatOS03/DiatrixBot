@@ -2395,6 +2395,11 @@ module.exports.run = async (bot, message, args) => {
         })
     })
     let sheriffEmoji = sheriff.setEmoji[Math.floor(Math.random() * sheriff.setEmoji.length)];
+
+    if (args[0]) sheriff.setEmoji.forEach(s => {
+        if (s.startsWith(`[char::<:s:${args[0].split(/:|>/)[2]}>][name::`) || s.startsWith(`[char::${args[0]}][name::`)) sheriffEmoji = s;
+    })
+
     let emoji = sheriffEmoji.split(/char::|]/)[1];
     let name = sheriffEmoji.split(/]|::/)[3];
   
@@ -2404,5 +2409,6 @@ module.exports.run = async (bot, message, args) => {
 module.exports.help = {
     name: "sheriff",
     desc: "howdy. i'm the sheriff of discord",
-    group: "Fun"
+    group: "Fun",
+    usage: " (emoji)"
 }
