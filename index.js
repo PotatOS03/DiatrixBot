@@ -63,7 +63,6 @@ bot.on("guildMemberRemove", async member => { // When a member leaves the server
     .addField("Message", messageReaction.message.content)
     .addField("Channel", messageReaction.message.channel)
     .setTimestamp(messageReaction.message.createdAt);
-
     starBoard.send(starEmbed);
     messageReaction.message.clearReactions();
   }
@@ -100,75 +99,75 @@ bot.on("message", async message => { // When a message is sent
   // Simplify the server's prefix into the prefix variable
   let prefix = prefixes[message.guild.id].prefixes;
   
-  // If the message starts with the prefix
-  if (message.content.startsWith(prefix)) {
-    // If the message is a command, run the command
-    let commandfile = bot.commands.get(cmd.slice(prefix.length));
-    if (commandfile) return commandfile.run(bot, message, args);
-  }
-
-  // If the user doesn't have any coins, give them 0 coins
-  if (!coins[message.author.id]) {
-    coins[message.author.id] = {
-      coins: 0
-    };
-  }
+  // If the message doesn't start with the prefix
+  if (!message.content.startsWith(prefix)) {
+    // If the user doesn't have any coins, give them 0 coins
+    if (!coins[message.author.id]) {
+      coins[message.author.id] = {
+        coins: 0
+      };
+    }
+    
+    let coinAmount = Math.floor(Math.random() * 60) + 1;
+    let baseAmount = Math.floor(Math.random() * 60) + 1;
+    
+    // Small chance that the user is awarded coins
+    if (coinAmount === baseAmount) {
+      coins[message.author.id].coins += Math.floor(coinAmount / 3) + 1; // Give the user a random amount of coins
+      // Save their coins
+      fs.writeFile("./coins.json", JSON.stringify(coins), (err) => {
+        if (err) console.log(err);
+      });
+    
+      // Message for when coins are added
+      let coinEmbed = new Discord.RichEmbed()
+      .setAuthor(message.author.username)
+      .setColor("f04747")
+      .addField("💸", `${Math.floor(coinAmount / 3)} coins added!`)
+      .addField("Total Coins", coins[message.author.id].coins);
+    
+      message.channel.send(coinEmbed).then(msg => {msg.delete(10000)});
+    }
+    
+    // Random amount of XP added for each message
+    let xpAdd = Math.floor(Math.random() * 5) + 15;
   
-  let coinAmount = Math.floor(Math.random() * 60) + 1;
-  let baseAmount = Math.floor(Math.random() * 60) + 1;
+    // If the user doesn't have any XP
+    if (!xp[message.author.id]) {
+      xp[message.author.id] = {
+        xp: 0, // Give them 0 XP
+        level: 1 // Level starts at 1
+      };
+    }
   
-  // Small chance that the user is awarded coins
-  if (coinAmount === baseAmount) {
-    coins[message.author.id].coins += Math.floor(coinAmount / 3) + 1; // Give the user a random amount of coins
-    // Save their coins
-    fs.writeFile("./coins.json", JSON.stringify(coins), (err) => {
+    // How much XP is needed to reach the next level
+    let nextLevel = Math.floor(Math.pow(xp[message.author.id].level, 1.5) * 3) * 100;
+    // Give the user the random amount of XP
+    xp[message.author.id].xp += xpAdd;
+  
+    // If the user has enough XP to level up
+    if (nextLevel <= xp[message.author.id].xp) {
+      xp[message.author.id].level++; // Increase their level by 1
+  
+      // Message to send
+      let levelUp = new Discord.RichEmbed()
+      .setTitle("Level Up!")
+      .setColor("f04747")
+      .addField("User", message.author.username)
+      .addField("New Level", xp[message.author.id].level);
+    
+      message.channel.send(levelUp).then(msg => {msg.delete(10000)});
+    }
+    // Save their XP
+    fs.writeFile("./xp.json", JSON.stringify(xp), (err) => {
       if (err) console.log(err);
     });
-  
-    // Message for when coins are added
-    let coinEmbed = new Discord.RichEmbed()
-    .setAuthor(message.author.username)
-    .setColor("f04747")
-    .addField("💸", `${Math.floor(coinAmount / 3)} coins added!`)
-    .addField("Total Coins", coins[message.author.id].coins);
-  
-    message.channel.send(coinEmbed).then(msg => {msg.delete(10000)});
+    return;
   }
-  
-  // Random amount of XP added for each message
-  let xpAdd = Math.floor(Math.random() * 5) + 15;
-  
-  // If the user doesn't have any XP
-  if (!xp[message.author.id]) {
-    xp[message.author.id] = {
-      xp: 0, // Give them 0 XP
-      level: 1 // Level starts at 1
-    };
-  }
-  
-  // How much XP is needed to reach the next level
-  let nextLevel = Math.floor(Math.pow(xp[message.author.id].level, 1.5) * 3) * 100;
-  // Give the user the random amount of XP
-  xp[message.author.id].xp += xpAdd;
-  
-  // If the user has enough XP to level up
-  if (nextLevel <= xp[message.author.id].xp) {
-    xp[message.author.id].level++; // Increase their level by 1
-  
-    // Message to send
-    let levelUp = new Discord.RichEmbed()
-    .setTitle("Level Up!")
-    .setColor("f04747")
-    .addField("User", message.author.username)
-    .addField("New Level", xp[message.author.id].level);
-  
-    message.channel.send(levelUp).then(msg => {msg.delete(10000)});
-  }
-  // Save their XP
-  fs.writeFile("./xp.json", JSON.stringify(xp), (err) => {
-    if (err) console.log(err);
-  });
-  return;
+
+  // If the message is a command, run the command
+  let commandfile = bot.commands.get(cmd.slice(prefix.length));
+  if (commandfile) return commandfile.run(bot, message, args);
 });
 
 // Log into the bot using the token
