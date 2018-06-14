@@ -14,22 +14,22 @@ fs.readdir("./commands", (err, files) => {
 })
 
 module.exports.run = async (bot, message, args) => {
-    let prefixes = require("../prefixes.json");
-
+    let servers = require("../servers.json");
+    
     let arg = args.slice(0).join(" ");
     for (var i = 0; i < cmds.length; i++) {
         if (arg === cmds[i].name) {
             let cmdEmbed = new Discord.RichEmbed()
             .setDescription(`**${arg}** command help`)
             .setColor("f04747")
-            .addField("Usage \`[required] (optional)\`", "`" + `${prefixes[message.guild.id].prefixes}${arg}${(cmds[i].usage || "")}` + "`")
+            .addField("Usage \`[required] (optional)\`", "`" + `${servers[message.guild.id].prefix}${arg}${(cmds[i].usage || "")}` + "`")
             .addField("Description", cmds[i].desc)
             if (cmds[i].group) cmdEmbed.addField("Category", cmds[i].group)
             if (cmds[i].perms) cmdEmbed.addField("Required Permission", cmds[i].perms)
             if (cmds[i].dm) cmdEmbed.addField("Allowed in DM", "Yes")
             else cmdEmbed.addField("Allowed in DM", "No")
             if (cmds[i].info) cmdEmbed.addField("More Information", cmds[i].info)
-            .setFooter(`To view all commands, type "${prefixes[message.guild.id].prefixes}help (page)"`);
+            .setFooter(`To view all commands, type "${servers[message.guild.id].prefix}help (page)"`);
 
             return message.channel.send(cmdEmbed);
         }
@@ -38,7 +38,7 @@ module.exports.run = async (bot, message, args) => {
     let helpEmbed = new Discord.RichEmbed()
     .setDescription("List of commands")
     .setColor("f04747")
-    .addField(`${message.guild.name} prefix:`, prefixes[message.guild.id].prefixes)
+    .addField(`${message.guild.name} prefix:`, servers[message.guild.id].prefix)
     
     for (var i = 0; i < groups.length; i++) {
         let longestName = 0;
@@ -58,7 +58,7 @@ module.exports.run = async (bot, message, args) => {
         }
         if (groups[i] !== "Developer") helpEmbed.addField(`${groups[i]}`, cmdsText)
     }
-    helpEmbed.setFooter(`Type "${prefixes[message.guild.id].prefixes}help (command)" to view more information about a command`);
+    helpEmbed.setFooter(`Type "${servers[message.guild.id].prefix}help (command)" to view more information about a command`);
 
     try {
         await message.author.send(helpEmbed);

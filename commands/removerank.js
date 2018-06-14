@@ -8,18 +8,18 @@ module.exports.run = async (bot, message, args) => {
     let rankName = args.slice(0).join(" ");
     if (!rankName) return errors.usage(message, "removerank", "No rank specified");
 
-    let ranks = require("../ranks.json");
+    let servers = require("../servers.json");
 
     let rank = -1;
 
-    for (var i = 0; i < ranks[message.guild.id].length; i++) {
-        if (message.guild.roles.find("id", ranks[message.guild.id][i]).name === rankName) rank = i;
+    for (let i in servers[message.guild.id].ranks) {
+        if (message.guild.roles.find("id", servers[message.guild.id].ranks[i]).name === rankName) rank = i;
     }
     if (rank === -1) return errors.usage(message, "removerank", `${rankName} is not a rank in this server`);
 
-    ranks[message.guild.id].splice(rank, 1);
+    servers[message.guild.id].ranks.splice(rank, 1);
     
-    fs.writeFileSync("./ranks.json", JSON.stringify(ranks));
+    fs.writeFileSync("./servers.json", JSON.stringify(servers));
 
     message.channel.send("Rank: `" + rankName + "` successfully removed");
 }

@@ -1,12 +1,10 @@
 const Discord = require("discord.js");
 
 module.exports.run = async (bot, message, args) => {
-    let sIcon = message.guild.iconURL;
-    
     let serverEmbed = new Discord.RichEmbed()
     .setDescription("Server Information")
     .setColor("f04747")
-    .setThumbnail(sIcon)
+    .setThumbnail(message.guild.iconURL)
     .addField("Server Name", message.guild.name)
     .addField("Created On", message.guild.createdAt)
     .addField("You Joined", message.member.joinedAt)

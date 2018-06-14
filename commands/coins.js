@@ -1,19 +1,21 @@
 const Discord = require("discord.js");
 const errors = require("../utilities/errors.js");
-let coins = require("../coins.json");
 
 module.exports.run = async (bot, message, args) => {
     let cUser = message.mentions.members.first();
     if (!args[0]) cUser = message.member;
     else if (!cUser) return errors.usage(message, "coins", "Couldn't find user");
 
-    if (!coins[cUser.id]) {
-        coins[cUser.id] = {
-            coins: 0
+    if (!users[cUser.id]) {
+        users[cUser.id] = {
+            coins: 0,
+            warnings: 0,
+            xp: 0,
+            level: 1
         };
     }
 
-    let uCoins = coins[cUser.id].coins;
+    let uCoins = users[cUser.id].coins;
 
     let coinEmbed = new Discord.RichEmbed()
     .setAuthor(cUser.user.username)
@@ -25,13 +27,8 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.dm = async (bot, message, args) => {
     let cUser = message.author;
-    if (!coins[cUser.id]) {
-        coins[cUser.id] = {
-            coins: 0
-        };
-    }
 
-    let uCoins = coins[cUser.id].coins;
+    let uCoins = users[cUser.id].coins;
 
     let coinEmbed = new Discord.RichEmbed()
     .setAuthor(cUser.username)

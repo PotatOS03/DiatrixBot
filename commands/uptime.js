@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const fs = require("fs");
 const errors = require("../utilities/errors.js");
-let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
+
 let uptime = 0;
 setInterval(e => uptime++, 1);
 

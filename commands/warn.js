@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 const fs = require("fs");
 const ms = require("ms");
 const errors = require("../utilities/errors.js");
-let warns = JSON.parse(fs.readFileSync("./warnings.json", "utf8"));
 let autoMute = 3;
 let autoBan = 5;
 
@@ -17,16 +16,18 @@ module.exports.run = async (bot, message, args) => {
 
     if (!reason) return errors.usage(message, "warn", "Specify a reason");
 
+    let users = require("../users.json");
 
-    if (!warns[wUser.id]) warns[wUser.id] = {
-        warns: 0
+    if (!users[wUser.id]) users[wUser.id] = {
+        coins: 0,
+        warnings: 0,
+        xp: 0,
+        level: 1
     };
 
-    warns[wUser.id].warns++;
+    users[wUser.id].warnings++;
 
-    fs.writeFile("./warnings.json", JSON.stringify(warns), (err) => {
-        if (err) console.log(err);
-    });
+    fs.writeFileSync("./users.json", JSON.stringify(users));
 
     let warnEmbed = new Discord.RichEmbed()
     .setDescription("Warns")

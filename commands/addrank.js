@@ -9,8 +9,7 @@ module.exports.run = async (bot, message, args) => {
     // If the user doesn't have the right permissions, tell them
     if (!message.member.hasPermission("MANAGE_ROLES")) return errors.noPerms(message, "Manage Roles");
 
-    let ranks = require("../ranks.json");
-    if (!ranks[message.guild.id]) ranks[message.guild.id] = [];
+    let servers = require("../servers.json");
 
     let rName = args.slice(0).join(" ");
     if (!rName) return errors.usage(message, "addrank", "Specify a rank name");
@@ -20,19 +19,17 @@ module.exports.run = async (bot, message, args) => {
         return errors.usage(message, "addrank", `${rName.name || rName} is not a role in this server`);
     }
 
-    if (ranks[message.guild.id].includes(rankRole.id)) return errors.usage(message, "addrank", "That role is already a rank in this server");
+    if (servers[message.guild.id].ranks.includes(rankRole.id)) return errors.usage(message, "addrank", "That role is already a rank in this server");
     
-    ranks[message.guild.id].push(rankRole.id);
-    
-    fs.writeFileSync("./ranks.json", JSON.stringify(ranks));
-    
-    let prefixes = require("../prefixes.json");
+    servers[message.guild.id].ranks.push(rankRole.id);
+
+    fs.writeFileSync("../servers.json", JSON.stringify(servers));
 
     let rankEmbed = new Discord.RichEmbed()
     .setTitle("Rank Added!")
     .setColor("f04747")
     .addField("Rank", rankRole.name)
-    .setFooter(`To view all ranks, type "${prefixes[message.guild.id].prefixes}ranks"`)
+    .setFooter(`To view all ranks, type "${servers[message.guild.id].prefix}ranks"`)
 
     message.channel.send(rankEmbed);
 }

@@ -3,21 +3,21 @@ const fs = require("fs");
 const errors = require("../utilities/errors.js");
 
 module.exports.run = async (bot, message, args) => {
-    let ranks = require("../ranks.json");
-    if (!ranks[message.guild.id] || ranks[message.guild.id].length <= 0) return errors.other(message, "This server doesn't have any ranks");
+    let servers = require("../servers.json");
+    if (servers[message.guild.id].ranks.length <= 0) return errors.other(message, "This server doesn't have any ranks");
 
     if (!args[0]) return errors.usage(message, "rank", "Specify a rank name");
 
     let rankName = args.slice(0).join(" ").toLowerCase();
     let rank = -1;
 
-    for (var i = 0; i < ranks[message.guild.id].length; i++) {
-        if (message.guild.roles.find("id", ranks[message.guild.id][i]).name.toLowerCase() === rankName) rank = i;
+    for (var i = 0; i < servers[message.guild.id].ranks.length; i++) {
+        if (message.guild.roles.find("id", servers[message.guild.id].ranks[i]).name.toLowerCase() === rankName) rank = i;
     }
 
     if (rank === -1) return errors.usage(message, "rank", `Couldn't find rank: ${rankName}`);
 
-    let rankRole = message.guild.roles.find("id", ranks[message.guild.id][rank]);
+    let rankRole = message.guild.roles.find("id", servers[message.guild.id].ranks[rank]);
 
     if (!message.member.roles.has(rankRole.id)) {
         message.member.addRole(rankRole.id);
