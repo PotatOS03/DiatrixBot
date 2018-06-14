@@ -9,12 +9,34 @@ const fs = require("fs");
 // File for the bot configuration - includes default prefix
 const botconfig = require("./botconfig.json");
 
-// Action log file
-let actionlog = require("./actionlog.js");
-// Coins file of all users
-let coins = require("./coins.json");
-// XP file of all users
-let xp = require("./xp.json");
+const { Client } = require("pg");
+
+const client = new Client({
+  connectionString: `${botconfig.connectionURL || process.env.DATABASE_URL}?ssl=true`
+})
+client.connect();
+
+let users = {};
+let servers = {};
+
+client.query("SELECT * FROM users", (err, res) => {
+  res.rows.forEach(u => {
+    users[u.id] = {
+      coins: u.coins,
+      warnings: u.warnings,
+      xp: u.xp,
+      level: u.level
+    }
+  })
+})
+client.query("SELECT * FROM servers", (err, res) => {
+  res.rows.forEach(s => {
+    servers[s.id] = {
+      prefix: s.prefix,
+      ranks: s.ranks.split(",")
+    }
+  })
+})
 
 // Setup of all commands in the commands folder
 fs.readdir("./commands", (err, files) => {
@@ -35,21 +57,277 @@ fs.readdir("./commands", (err, files) => {
 
 bot.on("ready", async () => { // When the bot is loaded
   console.log(`${bot.user.username} is online in ${bot.guilds.size} servers!`);
-  bot.user.setActivity(`Default Prefix: ${botconfig.prefix}`);
-});
 
-// Setup of action log
-actionlog.log(bot);
+  let userCount = 0;
+  bot.users.forEach(u => {
+    if (!u.bot) userCount++;
+})
+bot.user.setActivity(`Serving ${userCount} users`);
+});
 
 bot.on("guildMemberAdd", async member => { // When a member joins the server
   let welcomeChannel = member.guild.channels.find(`name`, "general"); // Channel to send welcome message
   welcomeChannel.send(`${member} has joined **${member.guild.name}**! Welcome!`); // Sends a welcome message
+
+  let userCount = 0;
+  bot.users.forEach(u => {
+    if (!u.bot) userCount++;
+  })
+  bot.user.setActivity(`Serving ${userCount} users`);
 });
 
 bot.on("guildMemberRemove", async member => { // When a member leaves the server or gets kicked
   let welcomeChannel = member.guild.channels.find(`name`, "general"); // Channel to send leave message
   welcomeChannel.send(`Goodbye, ${member} has left the server.`); // Sends a leave message
+
+  let userCount = 0;
+  bot.users.forEach(u => {
+    if (!u.bot) userCount++;
+  })
+  bot.user.setActivity(`Serving ${userCount} users`);
 });
+
+// Setup of action log
+let logChannel = "action-log";
+/*bot.on("channelCreate", async channel => {
+    try {
+        let actionLogChannel = channel.guild.channels.find(`name`, logChannel);
+    
+        let logEmbed = new Discord.RichEmbed()
+        .setTitle(`New ${channel.type} channel created`)
+        .setColor("f04747")
+        .addField("Channel", channel, true)
+        .addField("Position", channel.position, true);
+    
+        actionLogChannel.send(logEmbed);
+    } catch(e) {}
+});
+
+bot.on("channelDelete", async channel => {
+    let actionLogChannel = channel.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Channel deleted`)
+    .setColor("f04747")
+    .addField("Channel", channel.name, true)
+    .addField("Position", channel.position, true);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("channelPinsUpdate", async (channel, time) => {
+    let actionLogChannel = channel.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Channel pins updated`)
+    .setColor("f04747")
+    .addField("Channel", channel, true)
+    .addField("Time", time, true);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("channelUpdate", async (oldChannel, newChannel) => {
+    let actionLogChannel = newChannel.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Channel updated`)
+    .setColor("f04747")
+    .addField("Channel", newChannel);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("channelUpdate", async (oldChannel, newChannel) => {
+    let actionLogChannel = newChannel.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Channel updated`)
+    .setColor("f04747")
+    .addField("Channel", newChannel);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("emojiCreate", async emoji => {
+    let actionLogChannel = emoji.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`New emoji created`)
+    .setColor("f04747")
+    .addField("Emoji", emoji, true)
+    .addField("Name", emoji.name, true);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("emojiDelete", async emoji => {
+    let actionLogChannel = emoji.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Emoji deleted`)
+    .setColor("f04747")
+    .addField("Emoji", emoji);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("emojiUpdate", async emoji => {
+    let actionLogChannel = emoji.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Emoji updated`)
+    .setColor("f04747")
+    .addField("Emoji", emoji, true)
+    .addField("Old name", emoji.name, true);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("guildBanAdd", async (guild, user) => {
+    let actionLogChannel = guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Member banned`)
+    .setColor("f04747")
+    .addField("Member", `${user.username}#${user.discriminator}`);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("guildBanRemove", async (guild, user) => {
+    let actionLogChannel = guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Member unbanned`)
+    .setColor("f04747")
+    .addField("Member", user);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("guildMemberAdd", async member => {
+    let actionLogChannel = member.guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Member joined`)
+    .setColor("f04747")
+    .addField("Member", member, true)
+    .addField("Account created", member.user.createdAt);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("guildMemberRemove", async member => {
+    let actionLogChannel = member.guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Member left`)
+    .setColor("f04747")
+    .addField("Member", member);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("guildMemberUpdate", async (oldMember, newMember) => {
+    let actionLogChannel = newMember.guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Member updated`)
+    .setColor("f04747")
+    .addField("Member", newMember)
+    if (oldMember.nickname !== newMember.nickname) {
+        logEmbed.addField("Old nickname", oldMember.nickname, true)
+        .addField("New nickname", newMember.nickname, true);
+    }
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("guildUpdate", async (oldGuild, newGuild) => {
+    let actionLogChannel = newGuild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Server updated`)
+    .setColor("f04747")
+    .addField("Member", member);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("messageDelete", async message => {
+    let actionLogChannel = message.guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Message deleted`)
+    .setColor("f04747")
+    .addField("Author", message.author, true)
+    if (message.content && message.content.length <= 1024) logEmbed.addField("Message", message.content, true);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("messageUpdate", async (oldMessage, newMessage) => {
+    if (oldMessage.content && newMessage.content) {
+        let actionLogChannel = newMessage.guild.channels.find(`name`, logChannel);
+        
+        let logEmbed = new Discord.RichEmbed()
+        .setTitle(`Message updated`)
+        .setColor("f04747")
+        .addField("Author", newMessage.author)
+        .addField("Old message", oldMessage.content, true)
+        .addField("New message", newMessage.content, true);
+        
+        actionLogChannel.send(logEmbed);
+    }
+});
+
+bot.on("roleCreate", async role => {
+    let actionLogChannel = role.guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Role created`)
+    .setColor("f04747")
+    .addField("Role", role);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("roleDelete", async role => {
+    let actionLogChannel = role.guild.channels.find(`name`, logChannel);
+
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Role deleted`)
+    .setColor("f04747")
+    .addField("Role", role.name);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("roleUpdate", async (oldRole, newRole) => {
+    let actionLogChannel = newRole.guild.channels.find(`name`, logChannel);
+    
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`Role updated`)
+    .setColor("f04747")
+    .addField("Role", newRole);
+    
+    actionLogChannel.send(logEmbed);
+});
+
+bot.on("userUpdate", async (oldUser, newUser) => {
+    let actionLogChannel = newUser.guild.channels.find(`name`, logChannel);
+    console.log(oldUser)
+    let logEmbed = new Discord.RichEmbed()
+    .setTitle(`User updated`)
+    .setColor("f04747")
+    .addField("User", newUser)
+    .addField("Old name", `${oldUser.username}#${oldUser.discriminator}`, true)
+    .addField("New name", `${newUser.username}#${newUser.discriminator}`, true);
+    
+    actionLogChannel.send(logEmbed);
+});
+*/
 
 //Star board (for later)
 /*bot.on("messageReactionAdd", async (messageReaction, user) => {
@@ -81,35 +359,48 @@ bot.on("message", async message => { // When a message is sent
   if (message.channel.type === "dm") {
     if (!message.content.startsWith(botconfig.prefix)) return;
     let commandfile = bot.commands.get(cmd.slice(botconfig.prefix.length));
-    if (commandfile) commandfile.dm(bot, message, args);
+    if (commandfile) {
+        if (commandfile.help.dm) commandfile.dm(bot, message, args);
+        else message.channel.send(`Sorry, the ${commandfile.help.name} command is disabled in DM`);
+    }
     return;
   }
   
-  let prefixes = require("./prefixes.json") // File for custom server prefixes
-  
-  // If the prefixes file doesn't have a custom prefix for the server yet
-  if (!prefixes[message.guild.id]) {
-    prefixes[message.guild.id] = {
-      prefixes: botconfig.prefix // Set the server's prefix to the default one
-    };
-    fs.writeFileSync("./prefixes.json", JSON.stringify(prefixes));
+  if (!servers[message.guild.id]) servers[message.guild.id] = {
+    prefix: botconfig.prefix,
+    ranks: [],
   }
   
-  // Simplify the server's prefix into the prefix variable
-  let prefix = prefixes[message.guild.id].prefixes;
-  
+  if (!users[message.author.id]) users[message.author.id] = {
+    coins: 0,
+    warnings: 0,
+    xp: 0,
+    level: 1
+  }
+
+  let prefix = servers[message.guild.id].prefix;
+    
   // If the message starts with the prefix
   if (message.content.startsWith(prefix)) {
     // If the message is a command, run the command
     let commandfile = bot.commands.get(cmd.slice(prefix.length));
-    if (commandfile) return commandfile.run(bot, message, args);
-  }
+    if (commandfile) {
+      fs.writeFileSync("./servers.json", JSON.stringify(servers));
+      commandfile.run(bot, message, args);
 
-  // If the user doesn't have any coins, give them 0 coins
-  if (!coins[message.author.id]) {
-    coins[message.author.id] = {
-      coins: 0
-    };
+      servers = require("./servers.json");
+      users = require("./users.json");
+
+      client.query("DELETE FROM servers");
+      for (let i in servers) {
+        client.query(`INSERT INTO servers VALUES (${i}, '${servers[i].prefix}', '${servers[i].ranks.join(",")}')`);
+      }
+      client.query("DELETE FROM users");
+      for (let i in users) {
+        client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
+      }
+      return;
+    }
   }
   
   let coinAmount = Math.floor(Math.random() * 60) + 1;
@@ -117,16 +408,13 @@ bot.on("message", async message => { // When a message is sent
   
   // Small chance that the user is awarded coins
   if (coinAmount === baseAmount) {
-    coins[message.author.id].coins += Math.floor(coinAmount / 3) + 1; // Give the user a random amount of coins
-    // Save their coins
-    fs.writeFileSync("./coins.json", JSON.stringify(coins));
-  
+    users[message.author.id].coins += Math.floor(coinAmount / 3) + 1; // Give the user a random amount of coins
     // Message for when coins are added
     let coinEmbed = new Discord.RichEmbed()
     .setAuthor(message.author.username)
     .setColor("f04747")
-    .addField("💸", `${Math.floor(coinAmount / 3)} coins added!`)
-    .addField("Total Coins", coins[message.author.id].coins);
+    .addField("💸", `${Math.floor(coinAmount / 3) + 1} coins added!`)
+    .addField("Total Coins", users[message.author.id].coins);
   
     message.channel.send(coinEmbed).then(msg => {msg.delete(10000)});
   }
@@ -134,35 +422,32 @@ bot.on("message", async message => { // When a message is sent
   // Random amount of XP added for each message
   let xpAdd = Math.floor(Math.random() * 5) + 15;
   
-  // If the user doesn't have any XP
-  if (!xp[message.author.id]) {
-    xp[message.author.id] = {
-      xp: 0, // Give them 0 XP
-      level: 1 // Level starts at 1
-    };
-  }
-  
   // How much XP is needed to reach the next level
-  let nextLevel = Math.floor(Math.pow(xp[message.author.id].level, 1.5) * 3) * 100;
+  let nextLevel = Math.floor(Math.pow(users[message.author.id].level, 1.5) * 3) * 100;
   // Give the user the random amount of XP
-  xp[message.author.id].xp += xpAdd;
+  users[message.author.id].xp += xpAdd;
   
   // If the user has enough XP to level up
-  if (nextLevel <= xp[message.author.id].xp) {
-    xp[message.author.id].level++; // Increase their level by 1
+  if (nextLevel <= users[message.author.id].xp) {
+    users[message.author.id].level++; // Increase their level by 1
   
     // Message to send
     let levelUp = new Discord.RichEmbed()
+    .setAuthor(message.author.username, message.author.displayAvatarURL)
     .setTitle("Level Up!")
     .setColor("f04747")
-    .addField("User", message.author.username)
-    .addField("New Level", xp[message.author.id].level);
+    .addField("New Level", users[message.author.id].level)
+    .addField("Total XP", users[message.author.id].xp)
   
     message.channel.send(levelUp).then(msg => {msg.delete(10000)});
   }
-  // Save their XP
-  fs.writeFileSync("./xp.json", JSON.stringify(xp));
+  
+  fs.writeFileSync("./users.json", JSON.stringify(users));
+  client.query("DELETE FROM users");
+  for (let i in users) {
+    client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
+  }
 });
 
 // Log into the bot using the token
-bot.login(process.env.BOT_TOKEN)
+bot.login(process.env.BOT_TOKEN);
