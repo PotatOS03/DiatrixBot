@@ -33,8 +33,7 @@ module.exports.botPerms = (message, perm) => {
 module.exports.usage = (message, command, info) => {
     message.delete().catch();
 
-    // Find the prefix of either the server or default
-    let prefixes = require("../prefixes.json");
+    let servers = require("../servers.json");
     let botconfig = require("../botconfig.json");
 
     // Find help info about the command used
@@ -45,7 +44,7 @@ module.exports.usage = (message, command, info) => {
     .setTitle("INCORRECT USAGE")
     .setColor("f04747")
     .addField("Message Sent", message.content)
-    if (message.channel.type === "text") usageEmbed.addField("Usage", "`" + `${prefixes[message.guild.id].prefixes}${cmdHelp.name}${cmdHelp.usage}` + "`", true)
+    if (message.channel.type === "text") usageEmbed.addField("Usage", "`" + `${servers[message.guild.id].prefix}${cmdHelp.name}${cmdHelp.usage}` + "`", true)
     if (message.channel.type === "dm") usageEmbed.addField("Usage", "`" + `${botconfig.prefix}${cmdHelp.name}${cmdHelp.usage}` + "`", true)
     usageEmbed.addField("Info", info, true);
 
