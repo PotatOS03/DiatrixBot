@@ -439,17 +439,19 @@ bot.on("message", message => { // When a message is sent
     }
   }
 
-  servers = require("./servers.json");
-  users = require("./users.json");
-
-  client.query("DELETE FROM servers");
-  for (let i in servers) {
-    client.query(`INSERT INTO servers VALUES (${i}, '${servers[i].prefix}', '${servers[i].ranks.join(",")}')`);
-  }
-  client.query("DELETE FROM users");
-  for (let i in users) {
-    client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
-  }
+  setTimeout(function() {
+    servers = require("./servers.json");
+    users = require("./users.json");
+    
+    client.query("DELETE FROM servers");
+    for (let i in servers) {
+      client.query(`INSERT INTO servers VALUES (${i}, '${servers[i].prefix}', '${servers[i].ranks.join(",")}')`);
+    }
+    client.query("DELETE FROM users");
+    for (let i in users) {
+      client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
+    }
+  }, 1000)
 });
 
 // Log into the bot using the token
