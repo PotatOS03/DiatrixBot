@@ -433,13 +433,9 @@ bot.on("message", message => { // When a message is sent
     }
     
     fs.writeFileSync("./users.json", JSON.stringify(users));
-    client.query("DELETE FROM users");
-    for (let i in users) {
-      client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
-    }
   }
 
-  setTimeout(function() {
+  //setTimeout(function() {
     servers = require("./servers.json");
     users = require("./users.json");
     
@@ -451,7 +447,7 @@ bot.on("message", message => { // When a message is sent
     for (let i in users) {
       client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
     }
-  }, 1000)
+  //}, 1000)
 });
 
 // Log into the bot using the token
