@@ -5,6 +5,8 @@ module.exports.run = async (bot, message, args) => {
     let cUser = message.mentions.members.first();
     if (!args[0]) cUser = message.member;
     else if (!cUser) return errors.usage(message, "coins", "Couldn't find user");
+    
+    let users = require("../users.json");
 
     if (!users[cUser.id]) {
         users[cUser.id] = {
@@ -27,6 +29,7 @@ module.exports.run = async (bot, message, args) => {
 
 module.exports.dm = async (bot, message, args) => {
     let cUser = message.author;
+    let users = require("../users.json");
 
     let uCoins = users[cUser.id].coins;
 
