@@ -347,7 +347,7 @@ bot.on("userUpdate", async (oldUser, newUser) => {
   }
 });*/
 
-bot.on("message", async message => { // When a message is sent
+bot.on("message", message => { // When a message is sent
   if (message.author.bot) return; // Ignores the message if it is sent by a bot
 
   // Get certain parts of the message sent
@@ -379,6 +379,7 @@ bot.on("message", async message => { // When a message is sent
   }
 
   let prefix = servers[message.guild.id].prefix;
+  let isCommand = false;
     
   // If the message starts with the prefix
   if (message.content.startsWith(prefix)) {
@@ -387,62 +388,64 @@ bot.on("message", async message => { // When a message is sent
     if (commandfile) {
       fs.writeFileSync("./servers.json", JSON.stringify(servers));
       commandfile.run(bot, message, args);
-
-      servers = require("./servers.json");
-      users = require("./users.json");
-
-      client.query("DELETE FROM servers");
-      for (let i in servers) {
-        client.query(`INSERT INTO servers VALUES (${i}, '${servers[i].prefix}', '${servers[i].ranks.join(",")}')`);
-      }
-      client.query("DELETE FROM users");
-      for (let i in users) {
-        client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
-      }
-      return;
+      isCommand = true;
     }
   }
   
-  let coinAmount = Math.floor(Math.random() * 60) + 1;
-  let baseAmount = Math.floor(Math.random() * 60) + 1;
-  
-  // Small chance that the user is awarded coins
-  if (coinAmount === baseAmount) {
-    users[message.author.id].coins += Math.floor(coinAmount / 3) + 1; // Give the user a random amount of coins
-    // Message for when coins are added
-    let coinEmbed = new Discord.RichEmbed()
-    .setAuthor(message.author.username)
-    .setColor("f04747")
-    .addField("💸", `${Math.floor(coinAmount / 3) + 1} coins added!`)
-    .addField("Total Coins", users[message.author.id].coins);
-  
-    message.channel.send(coinEmbed).then(msg => {msg.delete(10000)});
+  if (!isCommand) {
+    let coinAmount = Math.floor(Math.random() * 60) + 1;
+    let baseAmount = Math.floor(Math.random() * 60) + 1;
+    
+    // Small chance that the user is awarded coins
+    if (coinAmount === baseAmount) {
+      users[message.author.id].coins += Math.floor(coinAmount / 3) + 1; // Give the user a random amount of coins
+      // Message for when coins are added
+      let coinEmbed = new Discord.RichEmbed()
+      .setAuthor(message.author.username)
+      .setColor("f04747")
+      .addField("💸", `${Math.floor(coinAmount / 3) + 1} coins added!`)
+      .addField("Total Coins", users[message.author.id].coins);
+    
+      message.channel.send(coinEmbed).then(msg => {msg.delete(10000)});
+    }
+    
+    // Random amount of XP added for each message
+    let xpAdd = Math.floor(Math.random() * 5) + 15;
+    
+    // How much XP is needed to reach the next level
+    let nextLevel = Math.floor(Math.pow(users[message.author.id].level, 1.5) * 3) * 100;
+    // Give the user the random amount of XP
+    users[message.author.id].xp += xpAdd;
+    
+    // If the user has enough XP to level up
+    if (nextLevel <= users[message.author.id].xp) {
+      users[message.author.id].level++; // Increase their level by 1
+    
+      // Message to send
+      let levelUp = new Discord.RichEmbed()
+      .setAuthor(message.author.username, message.author.displayAvatarURL)
+      .setTitle("Level Up!")
+      .setColor("f04747")
+      .addField("New Level", users[message.author.id].level)
+      .addField("Total XP", users[message.author.id].xp)
+    
+      message.channel.send(levelUp).then(msg => {msg.delete(10000)});
+    }
+    
+    fs.writeFileSync("./users.json", JSON.stringify(users));
+    client.query("DELETE FROM users");
+    for (let i in users) {
+      client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
+    }
   }
-  
-  // Random amount of XP added for each message
-  let xpAdd = Math.floor(Math.random() * 5) + 15;
-  
-  // How much XP is needed to reach the next level
-  let nextLevel = Math.floor(Math.pow(users[message.author.id].level, 1.5) * 3) * 100;
-  // Give the user the random amount of XP
-  users[message.author.id].xp += xpAdd;
-  
-  // If the user has enough XP to level up
-  if (nextLevel <= users[message.author.id].xp) {
-    users[message.author.id].level++; // Increase their level by 1
-  
-    // Message to send
-    let levelUp = new Discord.RichEmbed()
-    .setAuthor(message.author.username, message.author.displayAvatarURL)
-    .setTitle("Level Up!")
-    .setColor("f04747")
-    .addField("New Level", users[message.author.id].level)
-    .addField("Total XP", users[message.author.id].xp)
-  
-    message.channel.send(levelUp).then(msg => {msg.delete(10000)});
+
+  servers = require("./servers.json");
+  users = require("./users.json");
+
+  client.query("DELETE FROM servers");
+  for (let i in servers) {
+    client.query(`INSERT INTO servers VALUES (${i}, '${servers[i].prefix}', '${servers[i].ranks.join(",")}')`);
   }
-  
-  fs.writeFileSync("./users.json", JSON.stringify(users));
   client.query("DELETE FROM users");
   for (let i in users) {
     client.query(`INSERT INTO users VALUES (${i}, ${users[i].coins}, ${users[i].warnings}, ${users[i].xp}, ${users[i].level})`);
